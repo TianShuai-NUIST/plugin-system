@@ -1,9 +1,10 @@
 CC := clang
 TARGET := ./build/program
 BUILD := build
-SRC := src/main.c \
-       src/plugin_vector.c \
-       src/utils.c
+# SRC := src/main.c \
+#        src/plugin_vector.c \
+#        src/utils.c
+SRC := $(wildcard src/*.c)
 OBJ := $(patsubst src/%.c,build/%.o,$(SRC))
 CFLAGS := -Wall -Wextra -pg -g -Iinclude
 DEPFLAGS := -MMD -MP
