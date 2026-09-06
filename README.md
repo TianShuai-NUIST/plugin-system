@@ -166,3 +166,9 @@ include/utils.h:
 CFLAGS := -Wall -Wextra -pg -g -Iinclude
 LDLIBS := -ldl
 ```
+
+# 代码命名规范
+
+1. 函数: 下划线命名
+2. 变量: 下划线命名
+3. 结构体: 大驼峰命名

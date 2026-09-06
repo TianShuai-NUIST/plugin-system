@@ -4,27 +4,22 @@
 #include <dirent.h>
 #include <string.h>
 
-void plugin_list_free(plugin_list *v){
+void plugin_list_free(PluginList *v){
   if(NULL == v) return;
-  for(size_t i = 0; i < v->number; i++){
-    free(v->items[i]);
-  }
-  free(v->items);
-  v->items = NULL;
+  free(v->plugins);
+  v->plugins = NULL;
   v->number = 0;
 }
 
-void plugin_list_append(plugin_list *v, struct dirent *d){
-  struct dirent **new_items = (struct dirent**)malloc(sizeof(struct dirent*) * (v->number + 1));
-  if(v->items != NULL){
-    memcpy(new_items, v->items, v->number * sizeof(struct dirent *));
-    free(v->items);
+void plugin_list_append(PluginList *v, const Plugin *p){
+  Plugin *new_items = (Plugin *)malloc(sizeof(Plugin) * (v->number + 1));
+  if(v->plugins != NULL){
+    memcpy(new_items, v->plugins, v->number * sizeof(Plugin));
+    free(v->plugins);
   }
 
-  struct dirent *copy = (struct dirent *)malloc(sizeof(struct dirent));
-  *copy = *d;
-  new_items[v->number] = copy;
+  new_items[v->number] = *p;
 
-  v->items = new_items;
+  v->plugins = new_items;
   v->number++;
 }
