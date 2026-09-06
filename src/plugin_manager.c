@@ -6,7 +6,7 @@ void plugin_manager_set_plugins_path(const char* path){
   plugin_manager_plugins_path = path;
 }
 
-void plugin_manager_get_plugins(PluginList *v){
+static void plugin_manager_get_plugins(PluginList *v){
   // print current path
   char current_path[PATH_MAX];
   getcwd(current_path, PATH_MAX);
@@ -18,7 +18,7 @@ void plugin_manager_get_plugins(PluginList *v){
     fprintf(stderr, "ERROR: %s\n", strerror(errno));
     exit(1);
   }
-  
+
   // get plugin name
   struct dirent *current_item;
   while((current_item = readdir(plugin_dir))){
@@ -35,6 +35,7 @@ void plugin_manager_get_plugins(PluginList *v){
 }
 
 void plugin_manager_load_all(PluginList *p){
+  plugin_manager_get_plugins(p);
   for(size_t i = 0; i < p->number; i++){
     char path[PATH_MAX];
     int n = snprintf(path, sizeof(path), "%s/%s", plugin_manager_plugins_path, p->plugins[i].filename);
@@ -50,16 +51,51 @@ void plugin_manager_load_all(PluginList *p){
     } else {
       printf_info("load plugin \"%s\" Success!\n", p->plugins[i].filename);
     }
+    dlerror();
+    PluginInterface *iface = (PluginInterface *)dlsym(p->plugins[i].handle, "plugin_interface");
+    if(iface == NULL){
+      printf_error("Cant load <plugin_interface> in plugin \"%s\": %s\n", p->plugins[i].filename, dlerror());
+      dlclose(p->plugins[i].handle);
+      p->plugins[i].handle = NULL;
+      continue;
+    }
+
+    if(iface->version != PLUGIN_API_VERSION){
+      printf_error("Cant load plugin \"%s\": Version cant match!\n", p->plugins[i].filename);
+      dlclose(p->plugins[i].handle);
+      p->plugins[i].handle = NULL;
+      continue;
+    }
+    p->plugins[i].iface = *iface;
+    if(p->plugins[i].iface.initialize() != 0){
+      printf_error("Cant init plugin \"%s\"!\n", p->plugins[i].filename);
+      dlclose(p->plugins[i].handle);
+      p->plugins[i].handle = NULL;
+      continue;
+    }
   }
 }
 
 void plugin_manager_unload_all(PluginList *p){
   for(size_t i = 0; i < p->number; i++){
+    if(p->plugins[i].handle == NULL) continue;
+
+    p->plugins[i].iface.cleanup();
+
     if(dlclose(p->plugins[i].handle) == 0){
       printf_info("unload plugin \"%s\" Success!\n", p->plugins[i].filename);
+      p->plugins[i].handle = NULL;
     } else {
-      printf_error("Cant load plugin \"%s\": %s\n", p->plugins[i].filename, dlerror());
+      printf_error("Cant unload plugin \"%s\": %s\n", p->plugins[i].filename, dlerror());
       continue;
     }
+  }
+}
+
+void plugin_manager_execute_all(PluginList *p){
+  for(size_t i = 0; i < p->number; i++){
+    if(p->plugins[i].handle == NULL) continue;
+    if(p->plugins[i].iface.execute == NULL) continue;
+    p->plugins[i].iface.execute();
   }
 }

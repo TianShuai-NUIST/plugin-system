@@ -9,13 +9,13 @@
 typedef struct Plugin{
   void *handle;
   char filename[NAME_MAX + 1];
-  PluginInterface interface;
+  PluginInterface iface;
 } Plugin;
 
 #define PLUGIN_INIT {                 \
   .handle = NULL,                     \
     .filename = "",                   \
-    .interface = (PluginInterface){   \
+    .iface = (PluginInterface){   \
       .name = "",                     \
       .auther = "",                   \
       .version = 0,                   \

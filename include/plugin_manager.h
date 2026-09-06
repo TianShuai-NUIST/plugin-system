@@ -11,10 +11,11 @@
 #include "types.h"
 #include "utils.h"
 
+// static void plugin_manager_get_plugins(PluginList *v);
 
 void plugin_manager_set_plugins_path(const char* path);
-void plugin_manager_get_plugins(PluginList *v);
 void plugin_manager_load_all(PluginList *p);
 void plugin_manager_unload_all(PluginList *p);
+void plugin_manager_execute_all(PluginList *p);
 
 #endif

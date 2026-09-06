@@ -1,6 +1,8 @@
 #ifndef PLUGIN_INTERFACE_H
 #define PLUGIN_INTERFACE_H
 
+#define PLUGIN_API_VERSION 1
+
 typedef struct PluginInterface{
 	const char* name;
 	const char* auther;
