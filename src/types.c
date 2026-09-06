@@ -1,10 +1,10 @@
-#include "plugin_vector.h"
+#include "types.h"
 
 #include <stdlib.h>
 #include <dirent.h>
 #include <string.h>
 
-void vector_dirent_free(vector_dirent *v){
+void plugin_list_free(plugin_list *v){
   if(NULL == v) return;
   for(size_t i = 0; i < v->number; i++){
     free(v->items[i]);
@@ -14,7 +14,7 @@ void vector_dirent_free(vector_dirent *v){
   v->number = 0;
 }
 
-void vector_dirent_append(vector_dirent *v, struct dirent *d){
+void plugin_list_append(plugin_list *v, struct dirent *d){
   struct dirent **new_items = (struct dirent**)malloc(sizeof(struct dirent*) * (v->number + 1));
   if(v->items != NULL){
     memcpy(new_items, v->items, v->number * sizeof(struct dirent *));

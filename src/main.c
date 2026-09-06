@@ -9,11 +9,11 @@
 
 #include "plugin_interface.h"
 #include "utils.h"
-#include "plugin_vector.h"
+#include "types.h"
 
 const char *plugin_path = "./plugin";
 
-void init_plugin(vector_dirent *v){
+void init_plugin(plugin_list *v){
   char current_path[256];
   getcwd(current_path, 256);
   printf_info("Current path is %s\n", current_path);
@@ -28,7 +28,7 @@ void init_plugin(vector_dirent *v){
   while((current_item = readdir(plugin_dir))){
     if(!strncmp(".", current_item->d_name, 1)) continue;
     if(current_item->d_type != DT_REG) continue;
-    vector_dirent_append(v, current_item);
+    plugin_list_append(v, current_item);
   }
   printf_info("Find %zu plugins in plugin folder!\n", v->number);
   for(size_t i = 0; i < v->number; i++){
@@ -41,12 +41,23 @@ void init_plugin(vector_dirent *v){
 
 int main(int argn, char **argv){
   if(argn > 1) plugin_path = argv[1];
-  vector_dirent v_dirent = VECTOR_DIRENT_INIT;
+  plugin_list v_dirent = PLUGIN_LIST_INIT;
   init_plugin(&v_dirent);
 
   for(size_t i = 0; i < v_dirent.number; i++){
+    char path[256];
+    sprintf(path, "%s/%s",plugin_path, v_dirent.items[i]->d_name);
+    dlerror();
+    void* handle = dlopen(path, RTLD_LAZY);
+    if(NULL == handle){
+      printf_error("Cant load plugin \"%s\": %s\n", v_dirent.items[i]->d_name, dlerror());
+      continue;
+    } else {
+      printf_info("load plugin \"%s\" Success!\n", v_dirent.items[i]->d_name);
+    }
+    dlclose(handle);
   }
 
-  vector_dirent_free(&v_dirent);
+  plugin_list_free(&v_dirent);
   return 0;
 }

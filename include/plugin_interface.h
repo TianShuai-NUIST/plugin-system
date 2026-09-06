@@ -1,9 +1,8 @@
-#ifndef PLGUIN_INTERFACE_H
-#define PLGUIN_INTERFACE_H
+#ifndef PLUGIN_INTERFACE_H
+#define PLUGIN_INTERFACE_H
 
 typedef struct {
-	const char* plugin_name;
-	const char* display_name;
+	const char* name;
 	const char* auther;
 	unsigned int version;
 

@@ -1,8 +1,8 @@
-1. 在文件夹中批量读取插件
+# Program
 
+1. 在文件夹中批量读取插件 [Done]
 2. 实现插件函数约定
 
+# Note
 
-# 修复 ESC 在nvim中失效的问题
-
-# 改善在terminal中的操作体验
+1. makefile 修改落实到note中.
