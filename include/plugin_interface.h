@@ -2,8 +2,10 @@
 #define PLGUIN_INTERFACE_H
 
 typedef struct {
-	const char* name;
-	const char* version;
+	const char* plugin_name;
+	const char* display_name;
+	const char* auther;
+	unsigned int version;
 
 	int (*init)(void);
 	void (*execute)(void);
