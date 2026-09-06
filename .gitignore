@@ -1,0 +1,12 @@
+.ctags
+.tags.sys
+
+gmon.out
+program
+
+plugin/*.so
+
+main.plist
+
+test
+test.c
