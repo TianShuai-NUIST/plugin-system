@@ -12,18 +12,21 @@ void plugin_list_free(PluginList *v){
 }
 
 void plugin_list_append(PluginList *v, const Plugin *p){
-  Plugin *new_items = (Plugin *)malloc(sizeof(Plugin) * (v->len + 1));
-  if(new_items == NULL){
-    printf_error("Cant append item (%s): %s\n", p->filename, strerror(errno));
+  if(NULL == v || NULL == p) {
+    printf_error("argument is NULL!\n");
     return;
   }
-  if(v->plugins != NULL){
-    memcpy(new_items, v->plugins, v->len * sizeof(Plugin));
-    free(v->plugins);
+
+  if(v->len == v->capacity){
+    size_t new_capacity = (v->capacity == 0) ? 4 : v->capacity * 2;
+    Plugin *temp = realloc(v->plugins, new_capacity * sizeof(Plugin));
+    if(temp == NULL){
+      printf_error("Cant append item (%s): %s\n", p->filename, strerror(errno));
+      // TODO: 错误后处理
+      return;
+    }
+    v->plugins = temp;
+    v->capacity = new_capacity;
   }
-
-  new_items[v->len] = *p;
-
-  v->plugins = new_items;
-  v->len++;
+  v->plugins[v->len++] = *p;
 }

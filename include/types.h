@@ -29,11 +29,12 @@ typedef struct Plugin{
 
 typedef struct PluginList{
   size_t len;
+  size_t capacity;
   // struct dirent **items;
   Plugin *plugins;
 } PluginList;
 
-#define PLUGIN_LIST_INIT {0, NULL}
+#define PLUGIN_LIST_INIT {0, 0, NULL}
 void plugin_list_free(PluginList *v);
 void plugin_list_append(PluginList *v, const Plugin *p);
 #define FOR_EACH(x, list)\

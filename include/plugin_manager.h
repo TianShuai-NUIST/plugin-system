@@ -5,7 +5,7 @@
 
 #define PLUGIN_CHECK_HANDLE(x, list)\
 if((list)->plugins[(x)].handle == NULL){\
-  printf_error("plugin \"%s\" with \"NULL\" of handle: %s\n", (list)->plugins[(x)].filename, strerror(errno));\
+  printf_error("plugin \"%s\" with \"NULL\" of handle!\n", (list)->plugins[(x)].filename);\
   continue;\
 }
 
