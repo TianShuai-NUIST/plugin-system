@@ -1,12 +1,12 @@
-#include "plugin_manager.h"
-#include "utils.h"
-
 #include <unistd.h>
 #include <dirent.h>
 #include <stdio.h>
 #include <string.h>
 #include <errno.h>
 #include <dlfcn.h>
+
+#include "plugin_manager.h"
+#include "utils.h"
 
 static const char *plugin_manager_plugins_path = "./plugin";
 
@@ -43,10 +43,9 @@ static int plugin_manager_get_plugins(PluginList *v){
   return 0;
 }
 
-static void plugin_manager_init_all(PluginList *p){
+static void plugin_manager_get_interface(PluginList *p){
   FOR_EACH(i, p){
-    if(p->plugins[i].handle == NULL) continue;
-    if(p->plugins[i].iface.initialize == NULL) continue;
+    PLUGIN_CHECK_HANDLE(i, p);
 
     dlerror();
     PluginInterface *iface = (PluginInterface *)dlsym(p->plugins[i].handle, "plugin_interface");
@@ -64,6 +63,14 @@ static void plugin_manager_init_all(PluginList *p){
       continue;
     }
     p->plugins[i].iface = *iface;
+  }
+}
+
+static void plugin_manager_init_all(PluginList *p){
+  FOR_EACH(i, p){
+    PLUGIN_CHECK_HANDLE(i, p);
+    PLUGIN_CHECK_IFACE(i, p, initialize);
+
     if(p->plugins[i].iface.initialize() != 0){
       printf_error("Cant init plugin \"%s\"!\n", p->plugins[i].filename);
       dlclose(p->plugins[i].handle);
@@ -75,8 +82,8 @@ static void plugin_manager_init_all(PluginList *p){
 
 static void plugin_manager_cleanup_all(PluginList *p){
   FOR_EACH(i, p){
-    if(p->plugins[i].handle == NULL) continue;
-    if(p->plugins[i].iface.cleanup == NULL) continue;
+    PLUGIN_CHECK_HANDLE(i, p);
+    PLUGIN_CHECK_IFACE(i, p, cleanup);
     p->plugins[i].iface.cleanup();
   }
 }
@@ -102,6 +109,7 @@ void plugin_manager_load_all(PluginList *p){
       printf_info("load plugin \"%s\" Success!\n", p->plugins[i].filename);
     }
   }
+  plugin_manager_get_interface(p);
   plugin_manager_init_all(p);
 }
 
@@ -109,7 +117,7 @@ void plugin_manager_unload_all(PluginList *p){
   plugin_manager_cleanup_all(p);
 
   FOR_EACH(i, p){
-    if(p->plugins[i].handle == NULL) continue;
+    PLUGIN_CHECK_HANDLE(i, p);
 
     if(dlclose(p->plugins[i].handle) == 0){
       printf_info("unload plugin \"%s\" Success!\n", p->plugins[i].filename);
@@ -123,8 +131,8 @@ void plugin_manager_unload_all(PluginList *p){
 
 void plugin_manager_execute_all(PluginList *p){
   FOR_EACH(i, p){
-    if(p->plugins[i].handle == NULL) continue;
-    if(p->plugins[i].iface.execute == NULL) continue;
+    PLUGIN_CHECK_HANDLE(i, p);
+    PLUGIN_CHECK_IFACE(i, p, execute);
     p->plugins[i].iface.execute();
   }
 }

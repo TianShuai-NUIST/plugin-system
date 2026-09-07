@@ -9,9 +9,15 @@ MODE ?= debug
 SRC := $(wildcard src/*.c)
 OBJ := $(patsubst src/%.c,build/%.o,$(SRC))
 
-CFLAGS := -Wall -Wextra -pg -g -Iinclude
+CFLAGS := -Wall -Wextra -I include
 DEPFLAGS := -MMD -MP
 LDLIBS := -ldl
+
+ifeq ($(MODE), debug)
+	CFLAGS += -g -pg -O0 -DDEBUG
+else
+	CFLAGS += -g1 -O2
+endif
 
 PLUGIN_TYPE := plugin
 PLUGIN_SRC := $(wildcard src/plugin/*.c)

@@ -18,7 +18,7 @@ typedef struct Plugin{
     .filename = "",                   \
     .iface = (PluginInterface){       \
       .name = "",                     \
-      .auther = "",                   \
+      .author = "",                   \
       .version = 0,                   \
       \
       .initialize = NULL,             \
