@@ -1,22 +1,27 @@
 CC := clang
 TARGET := ./build/program
 BUILD := build
+MODE ?= debug
+
 # SRC := src/main.c \
 #        src/plugin_vector.c \
 #        src/utils.c
 SRC := $(wildcard src/*.c)
 OBJ := $(patsubst src/%.c,build/%.o,$(SRC))
+
 CFLAGS := -Wall -Wextra -pg -g -Iinclude
 DEPFLAGS := -MMD -MP
 LDLIBS := -ldl
+
+PLUGIN_TYPE := plugin
 PLUGIN_SRC := $(wildcard src/plugin/*.c)
-PLUGIN_SO := $(patsubst src/plugin/%.c, plugin/lib%.so, $(PLUGIN_SRC))
+PLUGIN_SO := $(patsubst src/plugin/%.c, plugin/%.$(PLUGIN_TYPE), $(PLUGIN_SRC))
 
 .PHONY: all clean run tags
 
 all: $(TARGET) $(PLUGIN_SO)
 
-plugin/lib%.so: src/plugin/%.c
+plugin/%.$(PLUGIN_TYPE): src/plugin/%.c
 	@mkdir -p plugin
 	$(CC) $(CFLAGS) -shared -fPIC $< -o $@
 
@@ -28,7 +33,7 @@ $(TARGET): $(OBJ)
 	$(CC) $(OBJ) -o $@ -pg $(LDLIBS)
 
 clean:
-	rm -rf $(BUILD) plugin/*.so
+	rm -rf $(BUILD) plugin/*.$(PLUGIN_TYPE)
 
 run: $(TARGET) $(PLUGIN_SO)
 	@cd $(BUILD) && ./program ../plugin

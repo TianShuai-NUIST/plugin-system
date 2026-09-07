@@ -1,25 +1,29 @@
 #include "types.h"
 
 #include <stdlib.h>
-#include <dirent.h>
 #include <string.h>
+#include <errno.h>
 
 void plugin_list_free(PluginList *v){
   if(NULL == v) return;
   free(v->plugins);
   v->plugins = NULL;
-  v->number = 0;
+  v->len = 0;
 }
 
 void plugin_list_append(PluginList *v, const Plugin *p){
-  Plugin *new_items = (Plugin *)malloc(sizeof(Plugin) * (v->number + 1));
+  Plugin *new_items = (Plugin *)malloc(sizeof(Plugin) * (v->len + 1));
+  if(new_items == NULL){
+    printf_error("Cant append item (%s): %s\n", p->filename, strerror(errno));
+    return;
+  }
   if(v->plugins != NULL){
-    memcpy(new_items, v->plugins, v->number * sizeof(Plugin));
+    memcpy(new_items, v->plugins, v->len * sizeof(Plugin));
     free(v->plugins);
   }
 
-  new_items[v->number] = *p;
+  new_items[v->len] = *p;
 
   v->plugins = new_items;
-  v->number++;
+  v->len++;
 }
