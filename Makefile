@@ -1,6 +1,8 @@
 CC := clang
-TARGET := ./build/program
-BUILD := build
+BUILD_DIR := build
+TEST_DIR := test
+TARGET := $(BUILD_DIR)/program
+
 MODE ?= debug
 
 # SRC := src/main.c \
@@ -9,7 +11,7 @@ MODE ?= debug
 SRC := $(wildcard src/*.c)
 OBJ := $(patsubst src/%.c,build/%.o,$(SRC))
 
-CFLAGS := -Wall -Wextra -I include
+CFLAGS := -Wall -Wextra -Iinclude
 DEPFLAGS := -MMD -MP
 LDLIBS := -ldl
 
@@ -23,7 +25,7 @@ PLUGIN_TYPE := plugin
 PLUGIN_SRC := $(wildcard src/plugin/*.c)
 PLUGIN_SO := $(patsubst src/plugin/%.c, plugin/%.$(PLUGIN_TYPE), $(PLUGIN_SRC))
 
-.PHONY: all clean run tags
+.PHONY: all clean run tags test
 
 all: $(TARGET) $(PLUGIN_SO)
 
@@ -31,18 +33,23 @@ plugin/%.$(PLUGIN_TYPE): src/plugin/%.c
 	@mkdir -p plugin
 	$(CC) $(CFLAGS) -shared -fPIC $< -o $@
 
-$(BUILD)/%.o: src/%.c
-	@mkdir -p $(BUILD)
+$(BUILD_DIR)/%.o: src/%.c
+	@mkdir -p $(BUILD_DIR)
 	$(CC) $(CFLAGS) $(DEPFLAGS) -c $< -o $@
 
 $(TARGET): $(OBJ)
 	$(CC) $(OBJ) -o $@ -pg $(LDLIBS)
 
 clean:
-	rm -rf $(BUILD) plugin/*.$(PLUGIN_TYPE)
+	rm -rf $(BUILD_DIR) plugin/*.$(PLUGIN_TYPE)
 
 run: $(TARGET) $(PLUGIN_SO)
-	@cd $(BUILD) && ./program ../plugin
+	@cd $(BUILD_DIR) && ./program ../plugin
+
+test: $(TARGET)
+	$(CC) $(CFLAGS) -Itest test/test_types.c src/types.c src/utils.c -o $(BUILD_DIR)/test_types
+	@./$(BUILD_DIR)/test_types
+
 
 SRCS    := $(shell find . -name '*.c' -not -path './.git/*' | grep -v build)
 tags:
